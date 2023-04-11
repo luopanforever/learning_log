@@ -403,23 +403,43 @@ for (i = 0;i < num_recvd;i ++) {
 
 > 设置`arp`静态映射
 >
-> 用arp静态映射 就可以用网络调试工具调试了
+> 用`arp`静态映射 就可以用网络调试工具调试了
+>
+> 注意设置的ip地址是要与本机网卡ip地址是同一个网段
 
 ```c++
+arp -s 10.17.31.80 00-0C-29-AF-77-5C
 
-arp -s 10.20.181.170 00-0C-29-AF-77-5C
-
-arp -d 10.20.181.170
+arp -d 10.17.31.80
 
 # The ARP entry addition failed: Access is denied
 
 netsh i i show in  # 查看网络接口的索引号
 
-netsh -c i i add neighbors 18 10.20.181.170 00-0C-29-AF-77-5C
+netsh -c i i add neighbors 18 10.17.31.80 00-0C-29-AF-77-5C
 
 netsh -c "i i" delete neighbors 1
 ```
 
 
 
-每次重启后需要从设置运行时环境变量开始
+
+
+
+
+# **关于`dpdk`无法接收来自主机的数据解决**
+
+- 保证绑定网卡前主机可以`ping`通虚拟机的`eth0`的桥接网卡
+
+- `eth0`的`ip`要在主机上静态绑定`eth0`的`mac`
+
+  ![发送接收数据](image\发送接收数据.png)
+
+
+
+
+
+## 重启虚拟机后需要做的事
+
+- 查看主机ip是否改变（连接不同的网络都会改变）
+  - 如果改变了就重新设置`/etc/network/interfaces`文件，设置`eth`的静态`ip`，需要与主机`ip`为同一网段即可
